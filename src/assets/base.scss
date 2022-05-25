@@ -1,0 +1,16 @@
+$primary: #8967b4;
+$info: #5bc0de;
+$success: #5cb85c;
+$warning: #f0ad4e;
+$danger: #d9534f;
+$link: #337ab7;
+$dark: #2a3049;
+$light: #f5f5f5;
+$white: #fff;
+$black: #000;
+
+html, body {
+  background-color: $light !important;
+}
+
+@import '../../node_modules/bulma/bulma.sass';
