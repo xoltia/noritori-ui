@@ -56,83 +56,88 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="box mt-6 mx-auto p-6" style="max-width: 500px">
-    <img
-      src="@/assets/logo.png"
-      alt="Noritori"
-      class="image mx-auto mb-6"
-      width="350"
-    />
+  <div class="narrow-page">
+    <div class="box mt-6 mx-auto p-6" style="max-width: 500px">
+      <img
+        src="@/assets/logo.png"
+        alt="Noritori"
+        class="image mx-auto mb-6"
+        width="300"
+      />
 
-    <div v-show="error" class="notification is-danger is-light">
-      {{ error }}
-    </div>
-
-    <div class="field">
-      <label class="label">Username</label>
-      <div class="control">
-        <input
-          :class="{
-            'is-danger': !validUsername && usernameModified,
-          }"
-          class="input"
-          v-model="username"
-          type="text"
-          placeholder="Username"
-        />
+      <div v-show="error" class="notification is-danger is-light">
+        {{ error }}
       </div>
-    </div>
 
-    <div class="field">
-      <label class="label">Password</label>
-      <div class="control">
-        <input
-          :class="{
-            'is-danger': !validPassword && passwordModified,
-          }"
-          class="input"
-          v-model="password"
-          type="password"
-          placeholder="Password"
-        />
+      <div class="field">
+        <label class="label">Username</label>
+        <div class="control">
+          <input
+            :class="{
+              'is-danger': !validUsername && usernameModified,
+            }"
+            class="input"
+            v-model="username"
+            type="text"
+            placeholder="Username"
+          />
+        </div>
       </div>
-    </div>
 
-    <div class="field" v-show="register">
-      <label class="label">Confirm Password</label>
-      <div class="control">
-        <input
-          :class="{
-            'is-danger': !validConfirmPassword && confirmPasswordModified,
-          }"
-          class="input"
-          v-model="confirmPassword"
-          type="password"
-          placeholder="Confirm Password"
-        />
+      <div class="field">
+        <label class="label">Password</label>
+        <div class="control">
+          <input
+            :class="{
+              'is-danger': !validPassword && passwordModified,
+            }"
+            class="input"
+            v-model="password"
+            type="password"
+            placeholder="Password"
+          />
+        </div>
       </div>
-    </div>
 
-    <div class="field">
-      <div class="control">
-        <label class="checkbox">
-          <input type="checkbox" v-model="register" />
-          Register
-        </label>
+      <div class="field" v-show="register">
+        <label class="label">Confirm Password</label>
+        <div class="control">
+          <input
+            :class="{
+              'is-danger': !validConfirmPassword && confirmPasswordModified,
+            }"
+            class="input"
+            v-model="confirmPassword"
+            type="password"
+            placeholder="Confirm Password"
+          />
+        </div>
       </div>
-    </div>
 
-    <button
-      v-show="!loading"
-      class="button is-primary is-fullwidth"
-      :disabled="!validRegistration || loading"
-      @click="submit"
-    >
-      {{ register ? 'Register' : 'Login' }}
-    </button>
-    <progress v-show="loading" class="progress is-small is-primary"></progress>
-    <div class="mt-2 has-text-centered">
-      <RouterLink to="/" class="is-link">Home</RouterLink>
+      <div class="field">
+        <div class="control">
+          <label class="checkbox">
+            <input type="checkbox" v-model="register" />
+            Register
+          </label>
+        </div>
+      </div>
+
+      <button
+        v-show="!loading"
+        class="button is-primary is-fullwidth"
+        :disabled="!validRegistration || loading"
+        @click="submit"
+      >
+        {{ register ? 'Register' : 'Login' }}
+      </button>
+      <progress
+        v-show="loading"
+        class="progress is-small is-primary"
+      ></progress>
+      <div class="mt-2 has-text-centered">
+        <RouterLink to="/" class="is-link">Home</RouterLink>
+      </div>
     </div>
   </div>
 </template>

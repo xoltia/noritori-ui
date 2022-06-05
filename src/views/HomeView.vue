@@ -6,7 +6,7 @@ const user = useUser()
 </script>
 
 <template>
-  <section class="section">
+  <div class="narrow-page">
     <RouterLink to="/" class="button is-primary mx-1">Home</RouterLink>
     <RouterLink
       v-show="!user.isAuthenticated"
@@ -23,5 +23,5 @@ const user = useUser()
       Logout
     </a>
     <RouterLink to="/review" class="button is-warning mx-1">Review</RouterLink>
-  </section>
+  </div>
 </template>

@@ -13,4 +13,17 @@ html, body {
   background-color: $light !important;
 }
 
+.narrow-page {
+  max-width: 1000px !important;
+  margin: 0 auto;
+  margin-top: 50px;
+}
+
 @import '../../node_modules/bulma/bulma.sass';
+
+@media (max-width: 768px) {
+  .narrow-page {
+    max-width: none;
+    padding: 0 10px;
+  }
+}
