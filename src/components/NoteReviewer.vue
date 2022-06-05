@@ -15,6 +15,7 @@ export type NoteState = {
 
 <script setup lang="ts">
 import { computed, watch, ref, reactive, onMounted, onUnmounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import type { Note } from '../stores/useNotes'
 import * as wanakana from 'wanakana'
 
@@ -106,6 +107,41 @@ const unfinishedNotes = computed(() =>
 
 // Computed boolean indicating if all notes have been answered
 const allNotesAnswered = computed(() => unfinishedNotes.value.length === 0)
+
+const percentCorrect = computed(() => {
+  const correctnesses = Array.from(noteStates.values())
+  const numAnswered = correctnesses.reduce(
+    (acc, { readingCorrectness, meaningCorrectness }) =>
+      acc +
+      (readingCorrectness !== Correctness.Unanswered ? 1 : 0) +
+      (meaningCorrectness !== Correctness.Unanswered ? 1 : 0),
+    0
+  )
+  const correctCount = correctnesses.reduce(
+    (acc, { readingCorrectness, meaningCorrectness }) =>
+      acc +
+      (readingCorrectness === Correctness.Correct ? 1 : 0) +
+      (meaningCorrectness === Correctness.Correct ? 1 : 0),
+    0
+  )
+  if (numAnswered === 0) {
+    return 0
+  }
+  return Math.round((correctCount / numAnswered) * 100)
+})
+
+const numPromptsAnswered = computed(() => {
+  const correctnesses = Array.from(noteStates.values())
+  return correctnesses.reduce(
+    (acc, { readingCorrectness, meaningCorrectness }) =>
+      acc +
+      (readingCorrectness !== Correctness.Unanswered ? 1 : 0) +
+      (meaningCorrectness !== Correctness.Unanswered ? 1 : 0),
+    0
+  )
+})
+
+const numTotalPrompts = computed(() => props.notes.length * 2)
 
 // Computed value for current note, currently the first note in the list or null if there are no notes
 const currentNote = computed(() =>
@@ -285,8 +321,35 @@ async function updateCorrectness() {
 </script>
 
 <template>
-  <div :class="['hero', showingMeaning ? 'is-primary' : 'is-link']">
-    <div class="hero-body has-text-centered" style="padding: 100px">
+  <div
+    :class="['hero', 'is-medium', showingMeaning ? 'is-primary' : 'is-link']"
+  >
+    <div class="hero-head">
+      <div class="level px-6 pt-2">
+        <div class="level-left">
+          <div class="level-item">
+            <RouterLink to="/">
+              <span class="icon is-large">
+                <i class="fas fa-home fa-lg"></i>
+              </span>
+            </RouterLink>
+          </div>
+        </div>
+        <div class="level-right">
+          <div class="level-item">
+            <span class="has-text-weight-semibold">
+              Answered: {{ numPromptsAnswered }}/{{ numTotalPrompts }}
+            </span>
+          </div>
+          <div class="level-item">
+            <span class="has-text-weight-semibold">
+              Accuracy: {{ percentCorrect }}%
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-body has-text-centered">
       <h1 class="title" style="font-size: 80px">{{ currentNote?.text }}</h1>
       <p class="subtitle">
         {{ showingMeaning ? 'Meaning' : 'Reading' }}
