@@ -14,29 +14,18 @@ export type NoteState = {
 </script>
 
 <script setup lang="ts">
-import { computed, watch, ref, reactive, onMounted, onUnmounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed, watch, ref, reactive } from 'vue'
 import type { Note } from '../stores/useNotes'
-import * as wanakana from 'wanakana'
+import type { Command } from './CommandButtons.vue'
+import NoteReviewHeader from './NoteReviewHeader.vue'
+import NoteReviewInput from './NoteReviewInput.vue'
+import NoteReviewDetails from './NoteReviewDetails.vue'
+import CommandButtons from './CommandButtons.vue'
 
 // Enum to define the different review types
 enum ReviewType {
   Meaning = 'meaning',
   Reading = 'reading',
-}
-
-interface Command {
-  action(): void
-  name: string
-  key: string
-  color?:
-    | 'primary'
-    | 'success'
-    | 'warning'
-    | 'danger'
-    | 'info'
-    | 'light'
-    | 'dark'
 }
 
 // Events that this component can emit
@@ -173,13 +162,6 @@ const currentPart = computed(() => {
 })
 
 const showingMeaning = computed(() => currentPart.value === ReviewType.Meaning)
-// const showingReading = computed(() => currentPart.value === ReviewType.Reading)
-const hasTags = computed(
-  () => currentNote.value && currentNote.value?.tags?.length > 0
-)
-const hasExampleSetences = computed(
-  () => currentNote.value && currentNote.value?.exampleSentences?.length > 0
-)
 const answer = ref('')
 const currentCorrectness = ref(Correctness.Unanswered)
 const showNoteProperties = ref(false)
@@ -195,45 +177,10 @@ watch(
   { immediate: true }
 )
 
-onMounted(() => {
-  // when the current note part being reviewed changes, check if it needs wanakana input (is the reading part)
-  watch(currentPart, (part) => {
-    const inputElement = document.getElementById('reading-input')
-    if (!inputElement || !(inputElement instanceof HTMLInputElement)) {
-      throw new Error('Could not find input element')
-    }
-
-    if (part === 'reading') {
-      wanakana.bind(inputElement)
-    } else {
-      wanakana.unbind(inputElement)
-    }
-
-    inputElement.focus()
-  })
-
-  window.addEventListener('keydown', commandListener)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', commandListener)
-})
-
 function resetState() {
   answer.value = ''
   currentCorrectness.value = Correctness.Unanswered
   showNoteProperties.value = false
-}
-
-function commandListener(e: KeyboardEvent) {
-  if (!commandsAreAvailable.value) {
-    return
-  }
-  const command = postAnswerCommands.find((c) => c.key === e.key)
-  if (command) {
-    e.preventDefault()
-    command.action()
-  }
 }
 
 function getNoteState(note: Note): NoteState {
@@ -321,129 +268,31 @@ async function updateCorrectness() {
 </script>
 
 <template>
-  <div
-    :class="['hero', 'is-medium', showingMeaning ? 'is-primary' : 'is-link']"
-  >
-    <div class="hero-head">
-      <div class="level px-6 pt-2">
-        <div class="level-left">
-          <div class="level-item">
-            <RouterLink to="/">
-              <span class="icon is-large">
-                <i class="fas fa-home fa-lg"></i>
-              </span>
-            </RouterLink>
-          </div>
-        </div>
-        <div class="level-right">
-          <div class="level-item">
-            <span class="has-text-weight-semibold">
-              Answered: {{ numPromptsAnswered }}/{{ numTotalPrompts }}
-            </span>
-          </div>
-          <div class="level-item">
-            <span class="has-text-weight-semibold">
-              Accuracy: {{ percentCorrect }}%
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="hero-body has-text-centered">
-      <h1 class="title" style="font-size: 80px">{{ currentNote?.text }}</h1>
-      <p class="subtitle">
-        {{ showingMeaning ? 'Meaning' : 'Reading' }}
-      </p>
-    </div>
-  </div>
+  <NoteReviewHeader
+    :subject="currentNote?.text ?? ''"
+    :subtitle="currentPart === 'meaning' ? 'Meaning' : 'Reading'"
+    :total-answered-prompts="numPromptsAnswered"
+    :total-prompts="numTotalPrompts"
+    :percent-correct="percentCorrect"
+    :background-color="showingMeaning ? 'primary' : 'link'"
+  />
   <div class="container is-fullhd p-2">
-    <input
-      type="text"
-      class="box answer-input mx-auto mt-2"
-      id="reading-input"
-      placeholder="答え"
-      v-model.lazy="answer"
-      :disabled="currentCorrectness !== Correctness.Unanswered"
-      :class="{
-        'has-background-danger': currentCorrectness === Correctness.Incorrect,
-        'has-background-success': currentCorrectness === Correctness.Correct,
-        'has-text-light': currentCorrectness !== Correctness.Unanswered,
-      }"
-      @keyup.enter="updateCorrectness()"
-      autocomplete="off"
+    <NoteReviewInput
+      v-model="answer"
+      :correctness="currentCorrectness ?? Correctness.Unanswered"
+      :useIME="currentPart === 'reading'"
+      :onSubmit="updateCorrectness"
+      class="mt-2"
     />
-    <div class="columns px-5 box" v-show="showNoteProperties">
-      <div class="column is-one-quarter">
-        <h5 class="title is-5">
-          {{ showingMeaning ? 'Meanings' : 'Readings' }}
-        </h5>
-        <p class="subtitle">
-          {{
-            (showingMeaning
-              ? currentNote?.meanings
-              : currentNote?.readings
-            )?.join('; ')
-          }}
-        </p>
-        <div v-show="hasTags">
-          <h5 class="title is-5 mt-1">Tags</h5>
-          <div class="subtitle">
-            <span v-for="(tag, index) in currentNote?.tags" :key="index">
-              <span class="tag is-primary">{{ tag }}</span>
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="column">
-        <h5 class="title is-5" v-show="!!currentNote?.description">
-          Explanation
-        </h5>
-        <p class="subtitle" v-show="!!currentNote?.description">
-          {{ currentNote?.description }}
-        </p>
-        <div v-show="hasExampleSetences">
-          <h5
-            class="title is-5 mb-2"
-            v-show="
-              !!currentNote?.exampleSentences &&
-              currentNote?.exampleSentences.length > 0
-            "
-          >
-            Example Sentences
-          </h5>
-          <ul>
-            <li
-              v-for="(sentence, index) in currentNote?.exampleSentences"
-              :key="index"
-              class="my-1"
-            >
-              {{ index + 1 }}. {{ sentence }}
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <div class="section has-text-centered" v-show="commandsAreAvailable">
-      <button
-        v-for="command in postAnswerCommands"
-        :key="command.key"
-        @click="command.action"
-        :class="['button', 'm-2', command.color ? 'is-' + command.color : '']"
-      >
-        {{ command.name }}&nbsp;
-        <small>[{{ command.key }}]</small>
-      </button>
-    </div>
+    <NoteReviewDetails
+      v-show="showNoteProperties"
+      :note="currentNote!"
+      :show-meaning="showingMeaning"
+    />
+    <CommandButtons
+      v-show="commandsAreAvailable"
+      :commands="postAnswerCommands"
+      :disabled="!commandsAreAvailable"
+    />
   </div>
 </template>
-
-<style scoped>
-.answer-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 1.5rem;
-  padding: 1rem;
-  text-align: center;
-}
-</style>
