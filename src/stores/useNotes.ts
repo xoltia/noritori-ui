@@ -1,6 +1,16 @@
 import { defineStore } from 'pinia'
 import axios from '../axios'
 
+export interface NewNote {
+  text: string
+  meanings: string[]
+  readings: string[]
+  description?: string
+  exampleSentences: string[]
+  tags: string[]
+  type: 'word' | 'kanji'
+}
+
 export interface Note {
   _id: string
   creator: string
@@ -9,7 +19,6 @@ export interface Note {
   readings: string[]
   description?: string
   exampleSentences: string[]
-  notes?: string
   tags: string[]
   type: 'word' | 'kanji'
   level: number
@@ -34,6 +43,9 @@ export const useNotes = defineStore('notes', {
     },
     async progressNote(noteId: string, amount: number): Promise<void> {
       await axios.patch(`/api/v1/notes/${noteId}/progress/${amount}`)
+    },
+    async createNote(note: NewNote): Promise<void> {
+      await axios.post('/api/v1/notes', note)
     },
   },
 })
