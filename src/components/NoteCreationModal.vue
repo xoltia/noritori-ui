@@ -35,7 +35,6 @@ const close = () => {
 }
 
 const submit = async () => {
-  console.log('submit')
   if (!text.value) return
   if (meanings.value.length === 0) return
   if (readings.value.length === 0) return

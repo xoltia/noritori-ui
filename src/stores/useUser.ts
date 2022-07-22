@@ -3,6 +3,13 @@ import axios from '../axios'
 
 const AUTH_BASE = '/api/v1/auth'
 
+export interface UserStats {
+  notes: number
+  dueNotes: number
+  burnedNotes: number
+  timeline: number[][]
+}
+
 export const useUser = defineStore('user', {
   state: () => {
     return { token: localStorage.getItem('token') } as {
@@ -41,6 +48,10 @@ export const useUser = defineStore('user', {
       })
 
       this.setToken(response.data.token)
+    },
+    async getStats(): Promise<UserStats> {
+      const response = await axios.get('/api/v1/users/my-stats')
+      return response.data
     },
   },
 })
