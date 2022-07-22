@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import TagInput from './TagInput.vue'
 import MultiInput from './MultiInput.vue'
 import { useNotes, type Note } from '../stores/useNotes'
@@ -20,6 +20,10 @@ const tags = ref<string[]>([])
 const sentences = ref<string[]>([])
 const noteType = ref<'word' | 'kanji'>('word')
 
+const canSubmit = computed(() => {
+  return !!text.value && meanings.value.length > 0 && readings.value.length > 0
+})
+
 const reset = () => {
   text.value = ''
   meanings.value = []
@@ -35,9 +39,7 @@ const close = () => {
 }
 
 const submit = async () => {
-  if (!text.value) return
-  if (meanings.value.length === 0) return
-  if (readings.value.length === 0) return
+  if (!canSubmit.value) return
 
   const note = {
     text: text.value,
@@ -124,7 +126,7 @@ const submit = async () => {
         <button
           class="button is-success"
           @click="submit"
-          :disabled="creatingNote"
+          :disabled="creatingNote || !canSubmit"
         >
           Create
         </button>
