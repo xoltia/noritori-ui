@@ -5,7 +5,9 @@ import { useUser, type UserStats } from '../stores/useUser'
 import TimelineChart from '../components/TimelineChart.vue'
 import LevelDistributionChart from '../components/LevelDistributionChart.vue'
 import NoteCreationModal from '../components/NoteCreationModal.vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const user = useUser()
 const showNoteModal = ref(false)
 const loadingUserStats = ref(true)
@@ -15,9 +17,30 @@ onMounted(async () => {
   userStats.value = await user.getStats()
   loadingUserStats.value = false
 })
+
+user.$subscribe(() => {
+  if (!user.isAuthenticated) {
+    // redirect to login
+    router.push('/login')
+  }
+})
 </script>
 
 <template>
+  <nav class="navbar px-5" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://bulma.io">
+        <img src="../assets/logo.png" width="112" height="28">
+      </a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          <a class="button is-primary" @click="user.logout()">Log out</a>
+        </div>
+      </div>
+    </div>
+  </nav>
   <div class="narrow-page has-text-centered">
     <div class="level box">
       <div class="level-item has-text-centered">
@@ -40,11 +63,7 @@ onMounted(async () => {
       </div>
     </div>
     <div class="my-5">
-      <a
-        v-show="user.isAuthenticated"
-        @click="showNoteModal = true"
-        class="button is-link mx-1 is-large"
-      >
+      <a @click="showNoteModal = true" class="button is-link mx-1 is-large">
         New Note
       </a>
       <RouterLink to="/review" class="button is-warning mx-1 is-large">
