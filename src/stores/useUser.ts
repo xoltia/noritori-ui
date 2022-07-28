@@ -8,6 +8,7 @@ export interface UserStats {
   dueNotes: number
   burnedNotes: number
   timeline: number[][]
+  notesPerLevel: number[]
 }
 
 export const useUser = defineStore('user', {

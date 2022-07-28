@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useUser, type UserStats } from '../stores/useUser'
 import TimelineChart from '../components/TimelineChart.vue'
+import LevelDistributionChart from '../components/LevelDistributionChart.vue'
 import NoteCreationModal from '../components/NoteCreationModal.vue'
 
 const user = useUser()
@@ -38,15 +39,7 @@ onMounted(async () => {
         </div>
       </div>
     </div>
-    <div class="box">
-      <h1 class="title is-4 my-4">Upcoming Reviews</h1>
-      <TimelineChart v-if="userStats" :timeline="userStats?.timeline" />
-      <div v-else class="has-text-centered">
-        <p>Loading...</p>
-      </div>
-    </div>
-
-    <div class="mt-5">
+    <div class="my-5">
       <a
         v-show="user.isAuthenticated"
         @click="showNoteModal = true"
@@ -57,6 +50,22 @@ onMounted(async () => {
       <RouterLink to="/review" class="button is-warning mx-1 is-large">
         Review
       </RouterLink>
+    </div>
+    <div class="box">
+      <h1 class="title is-4 my-4">Upcoming Reviews</h1>
+      <TimelineChart v-if="userStats" :timeline="userStats?.timeline" />
+      <div v-else class="has-text-centered">
+        <p>Loading...</p>
+      </div>
+
+      <h1 class="title is-4 my-4">Level Distribution</h1>
+      <LevelDistributionChart
+        v-if="userStats"
+        :notes-per-level="userStats?.notesPerLevel"
+      />
+      <div v-else class="has-text-centered">
+        <p>Loading...</p>
+      </div>
     </div>
   </div>
   <NoteCreationModal v-model:show="showNoteModal" />
